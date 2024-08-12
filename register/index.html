@@ -54,6 +54,11 @@
             color: red;
             margin-top: 10px;
         }
+
+        .success-message {
+            color: green;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -62,8 +67,10 @@
     <h2>Register</h2>
     <input type="email" id="email" placeholder="Email" required>
     <input type="password" id="password" placeholder="Password" required>
+    <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
     <button class="cta-button" onclick="register()">Register</button>
     <p class="error-message" id="error-message"></p>
+    <p class="success-message" id="success-message"></p>
 </div>
 
 <script>
@@ -85,17 +92,52 @@
     function register() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
         const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
 
+        // Clear previous messages
+        errorMessage.textContent = '';
+        successMessage.textContent = '';
+
+        // Validate input
+        if (password !== confirmPassword) {
+            errorMessage.textContent = "Passwords do not match.";
+            return;
+        }
+        if (password.length < 6) {
+            errorMessage.textContent = "Password should be at least 6 characters.";
+            return;
+        }
+
+        // Create user with email and password
         auth.createUserWithEmailAndPassword(email, password)
             .then((userCredential) => {
-                // Signed in 
+                // Registration successful
                 const user = userCredential.user;
-                alert("Registration successful!");
-                // You can redirect to another page here if needed
+                successMessage.textContent = "Registration successful! Redirecting...";
+                
+                // Redirect after a short delay
+                setTimeout(() => {
+                    window.location.href = "dashboard.html"; // Change this to your desired redirect page
+                }, 2000);
             })
             .catch((error) => {
-                errorMessage.textContent = error.message;
+                // Handle errors
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage.textContent = "Email is already in use.";
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage.textContent = "Invalid email address.";
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage.textContent = "Password is too weak.";
+                        break;
+                    default:
+                        errorMessage.textContent = error.message;
+                        break;
+                }
             });
     }
 </script>
