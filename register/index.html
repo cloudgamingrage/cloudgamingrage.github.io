@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
-    <!-- Include Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -76,8 +72,14 @@
     <p class="success-message" id="success-message"></p>
 </div>
 
-<script>
-    // Your Firebase configuration
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics.js";
+
+    // Your web app's Firebase configuration
     const firebaseConfig = {
         apiKey: "AIzaSyBgNtfM_WJBgB7iaXjLjVidJtHg8haBYvU",
         authDomain: "gitcoffee-48a8e.firebaseapp.com",
@@ -90,17 +92,13 @@
     };
 
     // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const database = firebase.database();
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
 
-    function register() {
-        // Ensure Firebase is initialized
-        if (!auth || !database) {
-            console.error("Firebase Auth or Database is not initialized!");
-            return;
-        }
-
+    // Register function
+    window.register = function() {
         const username = document.getElementById('username').value;
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
@@ -123,13 +121,13 @@
         }
 
         // Create user with email and password
-        auth.createUserWithEmailAndPassword(email, password)
+        createUserWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
                 // Registration successful
                 const user = userCredential.user;
 
                 // Save additional user data to Realtime Database
-                return database.ref('users/' + user.uid).set({
+                return set(ref(database, 'users/' + user.uid), {
                     username: username,
                     email: email
                 });
@@ -139,7 +137,7 @@
 
                 // Redirect after a short delay
                 setTimeout(() => {
-                    window.location.href = "dashboard.html"; // Change this to your desired redirect page
+                    window.location.href = "/dashboard/"; // Change this to your desired redirect page
                 }, 2000);
             })
             .catch((error) => {
