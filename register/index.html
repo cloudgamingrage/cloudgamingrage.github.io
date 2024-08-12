@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
-    <!-- Use the Firebase CDN links that work without modules -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -69,16 +70,18 @@
     <input type="email" id="email" placeholder="Email" required>
     <input type="password" id="password" placeholder="Password" required>
     <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+    <input type="text" id="username" placeholder="Username" required>
     <button class="cta-button" onclick="register()">Register</button>
     <p class="error-message" id="error-message"></p>
     <p class="success-message" id="success-message"></p>
 </div>
 
 <script>
-    // Initialize Firebase
+    // Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBgNtfM_WJBgB7iaXjLjVidJtHg8haBYvU",
   authDomain: "gitcoffee-48a8e.firebaseapp.com",
+  databaseURL: "https://gitcoffee-48a8e-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "gitcoffee-48a8e",
   storageBucket: "gitcoffee-48a8e.appspot.com",
   messagingSenderId: "996782745175",
@@ -86,15 +89,16 @@ const firebaseConfig = {
   measurementId: "G-T0BK6EVY6F"
 };
 
-
     // Initialize Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
+    const database = firebase.database();
 
     function register() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
+        const username = document.getElementById('username').value;
         const errorMessage = document.getElementById('error-message');
         const successMessage = document.getElementById('success-message');
 
@@ -117,15 +121,25 @@ const firebaseConfig = {
             .then((userCredential) => {
                 // Registration successful
                 const user = userCredential.user;
-                successMessage.textContent = "Registration successful! Redirecting...";
 
-                // Redirect after a short delay
-                setTimeout(() => {
-                    window.location.href = "/dashboard/"; // Change this to your desired redirect page
-                }, 2000);
+                // Store user data in Realtime Database
+                database.ref('users/' + user.uid).set({
+                    username: username,
+                    email: email
+                }).then(() => {
+                    successMessage.textContent = "Registration successful! Redirecting...";
+                    
+                    // Redirect after a short delay
+                    setTimeout(() => {
+                        window.location.href = "dashboard.html"; // Change this to your desired redirect page
+                    }, 2000);
+                }).catch((error) => {
+                    // Handle database errors
+                    errorMessage.textContent = "Error saving user data: " + error.message;
+                });
             })
             .catch((error) => {
-                // Handle errors
+                // Handle authentication errors
                 switch (error.code) {
                     case 'auth/email-already-in-use':
                         errorMessage.textContent = "Email is already in use.";
