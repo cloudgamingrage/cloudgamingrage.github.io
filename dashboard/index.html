@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f6f8fa;
+            color: #24292e;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #24292e;
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        h2 {
+            font-size: 2rem;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .cta-button {
+            background-color: #2ea44f;
+            color: white;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .logout-button {
+            background-color: #d73a49;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Welcome to Your Dashboard</h1>
+</header>
+
+<div class="container">
+    <h2>Hello, <span id="user-email"></span>!</h2>
+    <p>You have successfully logged in. Here you can manage your projects, collaborate with others, and explore new opportunities.</p>
+
+    <a href="#" class="cta-button">Go to Projects</a><br>
+    <a href="#" class="cta-button">Explore</a><br>
+    <a href="#" class="cta-button">Settings</a><br>
+    <button class="cta-button logout-button" onclick="logout()">Logout</button>
+</div>
+
+<script>
+    // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyBgNtfM_WJBgB7iaXjLjVidJtHg8haBYvU",
+    authDomain: "gitcoffee-48a8e.firebaseapp.com",
+    projectId: "gitcoffee-48a8e",
+    storageBucket: "gitcoffee-48a8e.appspot.com",
+    messagingSenderId: "996782745175",
+    appId: "1:996782745175:web:73d0e61b31cc2eedb6a512",
+    measurementId: "G-T0BK6EVY6F"
+  };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Check if a user is signed in
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            // User is signed in
+            document.getElementById('user-email').textContent = user.email;
+        } else {
+            // No user is signed in, redirect to login
+            window.location.href = "login.html"; // Change to your login page
+        }
+    });
+
+    function logout() {
+        auth.signOut().then(() => {
+            // Sign-out successful, redirect to login page
+            window.location.href = "login.html"; // Change to your login page
+        }).catch((error) => {
+            // An error happened
+            alert("Error logging out: " + error.message);
+        });
+    }
+</script>
+
+</body>
+</html>
