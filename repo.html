@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repository - GitCoffee</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            background-color: #f6f8fa;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar {
+            background-color: #24292e;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .navbar .menu a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 14px;
+        }
+        .navbar .menu a:hover {
+            text-decoration: underline;
+        }
+        .repo-content {
+            margin: 20px;
+        }
+        .repo-content h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #0366d6;
+        }
+        .repo-content p {
+            font-size: 16px;
+            margin: 5px 0;
+        }
+        .repo-content .repo-details {
+            padding: 15px;
+            background-color: #ffffff;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">GitCoffee</div>
+        <div class="menu">
+            <a href="create-repo.html">Create Repository</a>
+            <a href="profile.html">Profile</a>
+            <a href="login.html">Logout</a>
+        </div>
+    </div>
+
+    <div class="repo-content">
+        <h1>Repository Details</h1>
+        <div class="repo-details">
+            <p id="repoName">Repository Name: </p>
+            <p id="repoDescription">Description: </p>
+            <p id="repoStars">Stars: </p>
+            <p id="repoForks">Forks: </p>
+            <p id="repoCreatedAt">Created At: </p>
+            <p id="repoUpdatedAt">Updated At: </p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBgNtfM_WJBgB7iaXjLjVidJtHg8haBYvU",
+            authDomain: "gitcoffee-48a8e.firebaseapp.com",
+            databaseURL: "https://gitcoffee-48a8e-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "gitcoffee-48a8e",
+            storageBucket: "gitcoffee-48a8e.appspot.com",
+            messagingSenderId: "996782745175",
+            appId: "1:996782745175:web:73d0e61b31cc2eedb6a512",
+            measurementId: "G-T0BK6EVY6F"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Get the username and repository name from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('username');
+        const repoName = urlParams.get('repo');
+
+        if (username && repoName) {
+            fetchRepositoryDetails(username, repoName);
+        } else {
+            document.querySelector('.repo-content').innerHTML = '<p>Username or Repository not specified in URL.</p>';
+        }
+
+        function fetchRepositoryDetails(username, repoName) {
+            const repoRef = ref(db, `users/${username}/repositories`);
+            onValue(repoRef, (snapshot) => {
+                const repos = snapshot.val();
+                if (repos) {
+                    const repo = Object.values(repos).find(repo => repo.name === repoName);
+                    if (repo) {
+                        document.getElementById('repoName').textContent = `Repository Name: ${repo.name || 'Not available'}`;
+                        document.getElementById('repoDescription').textContent = `Description: ${repo.description || 'Not available'}`;
+                        document.getElementById('repoStars').textContent = `Stars: ${repo.stars || 'Not available'}`;
+                        document.getElementById('repoForks').textContent = `Forks: ${repo.forks || 'Not available'}`;
+                        document.getElementById('repoCreatedAt').textContent = `Created At: ${new Date(repo.created_at).toLocaleString() || 'Not available'}`;
+                        document.getElementById('repoUpdatedAt').textContent = `Updated At: ${new Date(repo.updated_at).toLocaleString() || 'Not available'}`;
+                    } else {
+                        document.querySelector('.repo-content').innerHTML = '<p>Repository not found.</p>';
+                    }
+                } else {
+                    document.querySelector('.repo-content').innerHTML = '<p>No repositories found for this user.</p>';
+                }
+            }, (error) => {
+                console.error('Error fetching repository data:', error); // Error handling
+                document.querySelector('.repo-content').innerHTML = '<p>Error fetching repository data.</p>';
+            });
+        }
+    </script>
+</body>
+</html>
