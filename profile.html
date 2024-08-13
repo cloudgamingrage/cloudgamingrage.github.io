@@ -73,9 +73,9 @@
     <div class="navbar">
         <div class="logo">GitCoffee</div>
         <div class="menu">
-            <a href="/new/">Create Repository</a>
-            <a href="#">Profile</a>
-            <a href="/login/">Logout</a>
+            <a href="create-repo.html">Create Repository</a>
+            <a href="profile.html">Profile</a>
+            <a href="login.html">Logout</a>
         </div>
     </div>
 
@@ -109,15 +109,17 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                const username = user.email.split('@')[0]; // Example: using part of the email as username
-                fetchUserProfile(username);
-                fetchRepositories(username);
-            } else {
-                window.location.href = "/login/"; // Redirect to login if not authenticated
-            }
-        });
+        // Get the username from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('username');
+
+        if (username) {
+            // Fetch user data
+            fetchUserProfile(username);
+            fetchRepositories(username);
+        } else {
+            document.querySelector('.profile-content').innerHTML = '<p>Username not specified in URL.</p>';
+        }
 
         function fetchUserProfile(username) {
             const userRef = ref(db, `users/${username}`);
