@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Repository</title>
+</head>
+<body>
+    <h1>Create a New Repository</h1>
+    <form id="repoForm">
+        <label for="repoName">Repository Name:</label><br>
+        <input type="text" id="repoName" name="repoName" required><br><br>
+
+        <label for="repoDescription">Description:</label><br>
+        <textarea id="repoDescription" name="repoDescription" required></textarea><br><br>
+
+        <label for="stars">Stars:</label><br>
+        <input type="number" id="stars" name="stars" required><br><br>
+
+        <label for="forks">Forks:</label><br>
+        <input type="number" id="forks" name="forks" required><br><br>
+
+        <button type="submit">Create Repository</button>
+    </form>
+
+    <script type="module">
+        // Import Firebase SDK components
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+        // Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyBgNtfM_WJBgB7iaXjLjVidJtHg8haBYvU",
+    authDomain: "gitcoffee-48a8e.firebaseapp.com",
+    databaseURL: "https://gitcoffee-48a8e-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "gitcoffee-48a8e",
+    storageBucket: "gitcoffee-48a8e.appspot.com",
+    messagingSenderId: "996782745175",
+    appId: "1:996782745175:web:73d0e61b31cc2eedb6a512",
+    measurementId: "G-T0BK6EVY6F"
+  };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let currentUsername = null;
+
+        // Check if the user is logged in and retrieve their username
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUsername = user.email.split('@')[0]; // Example: using part of the email as username
+                console.log("Logged in as:", currentUsername);
+            } else {
+                window.location.href = "login.html"; // Redirect to login if not authenticated
+            }
+        });
+
+        // Handle form submission
+        const repoForm = document.getElementById('repoForm');
+        repoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();  // Prevent default form submission
+
+            if (!currentUsername) {
+                alert("User not authenticated.");
+                return;
+            }
+
+            // Get form values
+            const repoName = document.getElementById('repoName').value;
+            const repoDescription = document.getElementById('repoDescription').value;
+            const stars = document.getElementById('stars').value;
+            const forks = document.getElementById('forks').value;
+
+            // Generate a unique ID for the new repository
+            const repoId = Date.now().toString(); // Using timestamp as a unique ID
+
+            // Prepare repository data
+            const repoData = {
+                name: repoName,
+                description: repoDescription,
+                stars: parseInt(stars),
+                forks: parseInt(forks),
+                created_at: new Date(),
+                updated_at: new Date()
+            };
+
+            try {
+                // Add repository data to Firestore under the logged-in user's username
+                await setDoc(doc(db, "users", currentUsername, "repositories", repoId), repoData);
+                alert("Repository created successfully!");
+            } catch (error) {
+                console.error("Error creating repository: ", error);
+                alert("Failed to create repository.");
+            }
+        });
+    </script>
+</body>
+</html>
