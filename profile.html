@@ -81,7 +81,7 @@
 
     <div class="profile-content">
         <h1>User Profile</h1>
-        <p id="userName">Username: </p>
+        <p id="userName">Name: </p>
         <p id="userEmail">Email: </p>
         <h2>Your Repositories</h2>
         <ul id="repoList" class="repo-list">
@@ -92,6 +92,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBgNtfM_WJBgB7iaXjLjVidJtHg8haBYvU",
@@ -106,13 +107,14 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        const auth = getAuth(app);
 
         // Get the username from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const username = urlParams.get('username');
 
         if (username) {
-            // Fetch user data
+            // Fetch user data and repositories
             fetchUserProfile(username);
             fetchRepositories(username);
         } else {
@@ -120,17 +122,16 @@
         }
 
         function fetchUserProfile(username) {
-            // Assuming that the username is directly used to fetch user profile
             const userRef = ref(db, `users/${username}`);
             onValue(userRef, (snapshot) => {
                 const data = snapshot.val();
                 console.log('User data:', data); // Debugging line
 
                 if (data) {
-                    document.getElementById('userName').textContent = `Username: ${data.username || 'Not available'}`;
+                    document.getElementById('userName').textContent = `Name: ${data.username || 'Not available'}`;
                     document.getElementById('userEmail').textContent = `Email: ${data.email || 'Not available'}`;
                 } else {
-                    document.getElementById('userName').textContent = 'Username: Not found';
+                    document.getElementById('userName').textContent = 'Name: Not found';
                     document.getElementById('userEmail').textContent = 'Email: Not found';
                 }
             });
